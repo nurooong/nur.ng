@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+:root {
+  --text-primary: #141414;
+  font-family: "Noto Sans KR";
+  color: var(--text-primary);
+}

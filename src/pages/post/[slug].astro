@@ -1,0 +1,40 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { ROUTING_CONFIG } from "@/blog-config";
+import type { GetStaticPaths } from "astro";
+import { render } from "astro:content";
+import { getCollection } from "astro:content";
+
+export const getStaticPaths = (async () => {
+  const entries = await getCollection('blog');
+  return entries.map((entry) => {
+    return {
+      params: {
+        slug: ROUTING_CONFIG.generateSlug(entry.data.publishDate.getTime()),
+      },
+      props: {
+        entry: entry,
+      }
+    }
+  })
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { title, publishDate } = entry.data;
+
+const { Content } = await render<'blog'>(entry);
+
+const formattedDate = `${publishDate.getFullYear()}. ${(publishDate.getMonth() + 1).toString().padStart(2, '0')}. ${publishDate.getDate().toString().padStart(2, '0')}. ${publishDate.getHours().toString().padStart(2, '0')}:${publishDate.getMinutes().toString().padStart(2, '0')}`
+---
+
+<BaseLayout pageTitle={title}>
+  <article class="flex flex-col gap-y-6">
+    <div>
+      <h1 class="font-bold text-2xl h-">{title}</h1>
+    <time class="font-bold" datetime={publishDate.toISOString()}>{formattedDate}</time>
+    </div>
+    <div class="flex flex-col gap-y-4 font-light">
+      <Content />
+    <div/>
+  </article>
+</BaseLayout>

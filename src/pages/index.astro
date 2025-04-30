@@ -1,0 +1,190 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Separator from "@/components/Separator.astro";
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import { ROUTING_CONFIG } from "@/blog-config";
+
+type Order = 'ACS' | 'DES';
+
+interface EntryInfo {
+  title: string,
+  url: string,
+  timestamp: number,
+}
+
+type Day = EntryInfo[];
+type Month = Map<number, Day>;
+type Year = Map<number, Month>;
+type YearGroup = Map<number, Year>;
+
+const entries = await getCollection('blog');
+
+function preprocessEntry(entry: CollectionEntry<'blog'>): {
+  title: string,
+  url: string,
+  timestamp: number,
+  year: number,
+  month: number,
+  day: number,
+} {
+  const publishDate: Date = entry.data.publishDate;
+  return {
+    title: entry.data.title,
+    url: ROUTING_CONFIG.generateSlug(publishDate.getTime()),
+    timestamp: publishDate.getTime(),
+    year: publishDate.getFullYear(),
+    month: publishDate.getMonth() + 1,
+    day: publishDate.getDate(),
+  }
+}
+
+const yearGroup: YearGroup = entries.reduce((acc, entry) => {
+  const { title, url, timestamp, year, month, day } = preprocessEntry(entry);
+
+  if (!acc.has(year)) {
+    acc.set(year, new Map<number, Month>() as Year);
+  }
+  const monthMap = acc.get(year)!;
+
+  if (!monthMap.has(month)) {
+    monthMap.set(month, new Map<number, Day>() as Month);
+  }
+  const dayMap = monthMap.get(month)!;
+
+  if (!dayMap.has(day)) {
+    dayMap.set(day, [] as EntryInfo[]);
+  }
+  const entryList = dayMap.get(day)!
+  const entryInfo: EntryInfo = {
+    title: title,
+    url: url,
+    timestamp: timestamp,
+  }
+
+  entryList.push(entryInfo);
+
+  return acc;
+}, new Map<number, Year>() as YearGroup)
+
+const order: Order = 'DES';
+
+function compare(a: number, b: number) {
+  if (order == 'ACS') {
+    return a - b;
+  } else {
+    return b - a;
+  }
+}
+---
+
+<BaseLayout>
+  <div class="post-archive">
+    { Array.from(yearGroup.entries())
+        .sort((a, b) => compare(a[0], b[0]))
+        .map(([year, monthMap], yearIndex) => {
+      return (
+        <>
+          <div class="year-group">
+            <time datetime={`${year}`} class="padding font-semibold">{year}</time>
+            <Separator orientation="vertical" />
+            <div class="year-list">
+              { Array.from(monthMap.entries())
+                  .sort((a, b) => compare(a[0], b[0]))
+                  .map(([month, dayMap], monthIndex) => {
+                const paddedMonth = month.toString().padStart(2, '0');
+                return (
+                  <>
+                    <div class="month-group">
+                      <time datetime={`${year}-${paddedMonth}`} class="padding font-medium">{paddedMonth}</time>
+                      <Separator />
+                      <div class="month-list">
+                        { Array.from(dayMap.entries())
+                            .sort((a, b) => compare(a[0], b[0]))
+                            .map(([day, entryList], dayIndex) => {
+                          const paddedDay = day.toString().padStart(2, '0');
+                          return (
+                            <>
+                              <div class="day-group">
+                                <time datetime={`${year}-${paddedMonth}-${paddedDay}`} class="padding font-normal">{paddedDay}</time>
+                                <Separator orientation="vertical" />
+                                <div class="day-list">
+                                  { entryList
+                                      .sort((a, b) => compare(a.timestamp, b.timestamp))
+                                      .map((entry, entryIndex) => {
+                                    return (
+                                      <a class="post-item padding font-light" href={`/post/${entry.url}`}>{entry.title}</a>
+                                    )
+                                  }) }
+                                </div>
+                              </div>
+                              { dayIndex < dayMap.size - 1 && <Separator /> }
+                            </>
+                          )
+                        }) }
+                      </div>
+                    </div>
+                    { monthIndex < monthMap.size - 1 && <Separator /> }
+                  </>
+                )
+              }) }
+            </div>
+          </div>
+          { yearIndex < yearGroup.size - 1 && <Separator /> }
+        </>
+      )
+    }) }
+  </div>
+</BaseLayout>
+
+<style>
+  .padding {
+    padding: 0.35rem 0.5rem 0.35rem 0.5rem;
+  }
+
+  .post-archive {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .year-group {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .year-list {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .month-list {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .month-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .day-group {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .day-list {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .post-item {
+
+  }
+
+  .post-item:hover {
+    background: #eeeeee;
+  }
+</style>

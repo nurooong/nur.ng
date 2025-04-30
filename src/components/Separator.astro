@@ -1,0 +1,47 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'div'> {
+  orientation?: 'horizontal' | 'vertical';
+  decorative?: boolean;
+  class?: string;
+}
+
+const {
+  orientation = 'horizontal',
+  decorative = false,
+  class: userClass,
+  ...rest
+} = Astro.props;
+
+const role = decorative ? 'none' : 'separator';
+const ariaOrientation = !decorative ? orientation : undefined;
+---
+
+<div
+  role={role}
+  aria-orientation={ariaOrientation}
+  data-orientation={orientation}
+  class:list={['separator-base', `separator-${orientation}`, userClass]}
+  {...rest}
+/>
+
+<style>
+  .separator-base {
+    border: 0;
+    flex-shrink: 0;
+    background-color: #e5e7eb;
+    cursor: default;
+  }
+
+  .separator-horizontal {
+    height: 1px;
+    width: 100%;
+  }
+
+  .separator-vertical {
+    width: 1px;
+    height: auto;
+    align-self: stretch;
+  }
+</style>
