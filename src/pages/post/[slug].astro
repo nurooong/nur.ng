@@ -20,14 +20,17 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { entry } = Astro.props;
-const { title, publishDate } = entry.data;
+const { title, publishDate, description } = entry.data;
 
 const { Content } = await render<'blog'>(entry);
 
 const formattedDate = `${publishDate.getFullYear()}. ${(publishDate.getMonth() + 1).toString().padStart(2, '0')}. ${publishDate.getDate().toString().padStart(2, '0')}. ${publishDate.getHours().toString().padStart(2, '0')}:${publishDate.getMinutes().toString().padStart(2, '0')}`
 ---
 
-<BaseLayout pageTitle={title}>
+<BaseLayout
+  pageTitle={title}
+  description={description}
+>
   <article class="flex flex-col gap-y-6">
     <div>
       <h1 class="font-bold text-2xl h-">{title}</h1>

@@ -7,9 +7,10 @@ import { Font } from "astro:assets";
 
 interface Props {
   pageTitle?: string,
+  description?: string,
 }
 
-const { pageTitle } = Astro.props;
+const { pageTitle, description } = Astro.props;
 
 const { siteTitle } = GENERAL_CONFIG;
 const title = pageTitle ? `${pageTitle} | ${siteTitle}` : `${siteTitle}`
@@ -20,6 +21,7 @@ const title = pageTitle ? `${pageTitle} | ${siteTitle}` : `${siteTitle}`
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description ? description : GENERAL_CONFIG.description} />
 		<title>{title}</title>
     <Font cssVariable="--font-noto-sans-kr" preload />
     <Font cssVariable="--font-jetbrains-mono" preload />
