@@ -3,6 +3,7 @@ import "@/styles/global.css";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import { GENERAL_CONFIG } from "@/blog-config";
+import { Font } from "astro:assets";
 
 interface Props {
   pageTitle?: string,
@@ -18,11 +19,10 @@ const title = pageTitle ? `${pageTitle} | ${siteTitle}` : `${siteTitle}`
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
 		<meta name="viewport" content="width=device-width" />
 		<title>{title}</title>
+    <Font cssVariable="--font-noto-sans-kr" preload />
+    <Font cssVariable="--font-jetbrains-mono" preload />
 	</head>
 	<body>
     <Header />

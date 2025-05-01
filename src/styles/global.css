@@ -2,7 +2,11 @@
 @plugin "@tailwindcss/typography";
 
 :root {
+  /* variables */
   --text-primary: #141414;
-  font-family: "Noto Sans KR";
+  --font-default: var(--font-noto-sans-kr);
+
+  /* global styles */
+  font-family: var(--font-default);
   color: var(--text-primary);
 }
